@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse
 import requests
+from pydantic import BaseModel
 from sklearn.feature_extraction.text import TfidfVectorizer
 from nltk.tokenize import WordPunctTokenizer
 
@@ -10,22 +11,33 @@ from google.cloud import translate_v2 as translate
 app = FastAPI()
 
 # 구글 클라우드 키 경로 설정하기
-translate_client = translate.Client.from_service_account_json("my-key.json")
+translate_client = translate.Client.from_service_account_json("../my-key.json")
 
-@app.post("/generate-images", response_class=HTMLResponse)
-async def generate_image(request: Request):
-    form_data = await request.form()
+class ImageInput(BaseModel):
+    keyword1: str = None  # 사용자가 제공하는 키워드1 (선택사항)
+    keyword2: str = None  # 사용자가 제공하는 키워드2 (선택사항)
+    keyword3: str = None  # 사용자가 제공하는 키워드3 (선택사항)
+    keyword4: str = None  # 사용자가 제공하는 키워드4 (선택사항)
+    keyword5: str = None  # 사용자가 제공하는 키워드5 (선택사항)
+    text: str             # 이미지 생성에 필요한 입력 텍스트
 
-    text = form_data.get("text")
+@app.get("/", response_class=HTMLResponse)
+def read_root():
+    return """
+        <html>
+            <body>
+                <p>Click <a href="/docs">here</a> to go to the Swagger UI and test the generate_image endpoint.</p>
+            </body>
+        </html>
+        """
 
-    # Translate the input text to English using Google Cloud Translation API.
-    result = translate_client.translate(text, target_language="en")
-
-    # Get the translated text.
-    translated_text = result["input"]
-
+@app.post("/generate_image", response_class=HTMLResponse)
+async def generate_image(input_data: ImageInput):
+    
+     # 사용자가 입력한 키워드를 리스트로 만듭니다.
+    user_keywords_list=[input_data.keyword1,input_data.keyword2,input_data.keyword3,input_data.keyword4,input_data.keyword5]
+     
     tokenizer = WordPunctTokenizer()
-
     stop_words = [
         ".",
         ",",
@@ -213,48 +225,71 @@ async def generate_image(request: Request):
 
     vectorizer = TfidfVectorizer(tokenizer=tokenizer.tokenize, stop_words=stop_words)
 
-    tfidf_matrix = vectorizer.fit_transform([translated_text])
+    # 입력된 텍스트에 대해 TF-IDF 벡터라이저를 적용합니다.
+    tfidf_matrix = vectorizer.fit_transform([input_data.text])
 
+    # TF-IDF 벡터라이저에서 feature 이름들을 가져옵니다.
     feature_names = vectorizer.get_feature_names_out()
 
-    # Sort by tf-idf score and get top 5 keywords
+    # TF-IDF 점수 기준으로 정렬하고 상위 5개의 키워드를 가져옵니다.
     sorted_keywords_indices = tfidf_matrix.toarray().argsort()[0][::-1][:5]
 
-    keywords_prompt = " ".join(
-        [feature_names[index] for index in sorted_keywords_indices]
-    )
+    top_5_tfidf_keywords=[feature_names[index] for index in sorted_keywords_indices]
+       
+     # 사용자가 제공한 키워드와 TF-IDF로 추출된 키워드들을 합칩니다. 
+    final_user_and_tfidf_keywrods=user_keywords_list+top_5_tfidf_keywords[:max(0, 5-len(user_keywords_list))]
+
+    translated_final_keywords=[]
+    for keyword in final_user_and_tfidf_keywrods:
+        if keyword is not None:
+            # Google Cloud Translation API를 사용하여 각 키워드를 영어로 번역합니다.
+            result_keyword_translate=translate_client.translate(keyword,target_language='en')
+            translated_final_keywords.append(result_keyword_translate['input'])
+
+    final_translated_user_and_tfidf_keywrods = translated_final_keywords
+
+    keywords_prompt=" ".join(final_translated_user_and_tfidf_keywrods)
 
     REST_API_KEY = "9ea943bc1dce2cd5fe7a41bdba661924"
 
-    try:
-        r = requests.post(
-            "https://api.kakaobrain.com/v2/inference/karlo/t2i",
-            json={
-                "prompt": keywords_prompt,
+    image_urls=[]  
+    for _ in range(8):   
+            r=requests.post(
+                'https://api.kakaobrain.com/v2/inference/karlo/t2i',
+                            json={
+                'prompt':keywords_prompt,
             },
             headers={
-                "Authorization": f"KakaoAK {REST_API_KEY}",
-                "Content-Type": "application/json",
-            },
+                'Authorization': f'KakaoAK {REST_API_KEY}',
+                'Content-Type':'application/json'
+            }
         )
+        
+    if r.status_code != 200:
+            raise HTTPException(status_code=400, detail="Image generation failed")
 
-        if r.status_code != 200:
-            raise HTTPException()
-
-        response_json = r.json()
+    response_json = r.json()
+        
+    image_url = response_json["images"][0]["image"]
+        
+    image_urls.append(image_url)
     
-        image_url = response_json["images"][0]["image"]
+    html_content = """
+        <html>
+            <body>
+                Generated Images:<br/>
+    """
+    
+    for url in image_urls:
+        html_content += f'<img src="{url}" alt="{keywords_prompt}"><br/>'
+    
+    html_content += f"""
+                    Keywords:<br/>
+                    {', '.join(final_translated_user_and_tfidf_keywrods)}
+                </body>
+            </html>"""
 
-        return {
-            'isSuccess': True,
-            'code': 200,
-            'message': '요청에 성공하였습니다.',
-            'data': image_url,
-        }
+    return HTMLResponse(content=html_content, status_code=200)
 
-    except HTTPException as e:
-        return {
-        'isSuccess': False,
-        'code': 400,
-        'message': '이미지 생성에 실패하였습니다.'
-    }
+
+            
