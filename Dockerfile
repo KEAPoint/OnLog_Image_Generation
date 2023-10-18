@@ -3,6 +3,8 @@ FROM python:3.9
 # /code 폴더 만들기
 WORKDIR /code
 
+ADD . /code
+
 # ./requirements.txt 를 /code/requirements.txt 로 복사
 COPY ./requirements.txt /code/requirements.txt
 
