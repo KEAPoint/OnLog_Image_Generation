@@ -13,21 +13,6 @@ app = FastAPI()
 # 구글 클라우드 키 경로 설정하기
 translate_client = translate.Client.from_service_account_json("my-key.json")
 
-@app.get("/", response_class=HTMLResponse)
-async def read_root():
-    html_content = """
-    <html>
-        <body>
-            <form action="/generate_image/" method="post">
-                <textarea name="text" placeholder="Enter your text here"></textarea>
-                <button>Generate Image</button>
-            </form>
-        </body>
-    </html>
-    """
-    return HTMLResponse(content=html_content, status_code=200)
-
-
 @app.post("/generate_image/", response_class=HTMLResponse)
 async def generate_image(request: Request):
     form_data = await request.form()
@@ -242,32 +227,35 @@ async def generate_image(request: Request):
 
     REST_API_KEY = "9ea943bc1dce2cd5fe7a41bdba661924"
 
-    r = requests.post(
-        "https://api.kakaobrain.com/v2/inference/karlo/t2i",
-        json={
-            "prompt": keywords_prompt,
-        },
-        headers={
-            "Authorization": f"KakaoAK {REST_API_KEY}",
-            "Content-Type": "application/json",
-        },
-    )
+    try:
+        r = requests.post(
+            "https://api.kakaobrain.com/v2/inference/karlo/t2i",
+            json={
+                "prompt": keywords_prompt,
+            },
+            headers={
+                "Authorization": f"KakaoAK {REST_API_KEY}",
+                "Content-Type": "application/json",
+            },
+        )
 
-    if r.status_code != 200:
-        raise HTTPException(status_code=400, detail="Image generation failed")
+        if r.status_code != 200:
+            raise HTTPException()
 
-    response_json = r.json()
+        response_json = r.json()
+    
+        image_url = response_json["images"][0]["image"]
 
-    image_url = response_json["images"][0]["image"]
+        return {
+            'isSuccess': True,
+            'code': 200,
+            'message': '요청에 성공하였습니다.',
+            'data': image_url,
+        }
 
-    html_content = f"""
-            <html>
-                <body>
-                    Generated Image:<br/>
-                    <img src="{image_url}" alt="{keywords_prompt}">
-                    Keywords:<br/>
-                    {keywords_prompt}
-                </body>
-            </html>"""
-
-    return HTMLResponse(content=html_content, status_code=200)
+    except HTTPException as e:
+        return {
+        'isSuccess': False,
+        'code': 400,
+        'message': '이미지 생성에 실패하였습니다.'
+    }
