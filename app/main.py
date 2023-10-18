@@ -1,7 +1,6 @@
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse
 import requests
-import json
 from sklearn.feature_extraction.text import TfidfVectorizer
 from nltk.tokenize import WordPunctTokenizer
 
@@ -13,7 +12,7 @@ app = FastAPI()
 # 구글 클라우드 키 경로 설정하기
 translate_client = translate.Client.from_service_account_json("my-key.json")
 
-@app.post("/generate_image/", response_class=HTMLResponse)
+@app.post("/generate-images", response_class=HTMLResponse)
 async def generate_image(request: Request):
     form_data = await request.form()
 
