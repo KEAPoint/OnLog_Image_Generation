@@ -1,8 +1,5 @@
 FROM python:3.11.4
 
-COPY ./src /src
-WORKDIR /src
-
 RUN pip install -r requirements.txt
 
 EXPOSE 80
