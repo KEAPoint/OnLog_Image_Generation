@@ -8,6 +8,11 @@ from nltk.tokenize import WordPunctTokenizer
 # Google Cloud Translation 라이브러리를 가져옵니다.
 from google.cloud import translate_v2 as translate
 
+import logging  # Python의 기본 로깅 모듈을 가져옵니다.
+
+# 사용자 정의 로거를 생성합니다.
+logger = logging.getLogger(__name__)
+
 app = FastAPI()
 
 # 구글 클라우드 키 경로 설정하기
@@ -31,7 +36,7 @@ def read_root():
         </html>
         """
 
-@app.post("/generate_image", response_class=HTMLResponse)
+@app.post("/generate-image")
 async def generate_image(input_data: ImageInput):
     
      # 사용자가 입력한 키워드를 리스트로 만듭니다.
@@ -252,44 +257,42 @@ async def generate_image(input_data: ImageInput):
 
     REST_API_KEY = "9ea943bc1dce2cd5fe7a41bdba661924"
 
-    image_urls=[]  
+    image_urls = []  
     for _ in range(8):   
-            r=requests.post(
-                'https://api.kakaobrain.com/v2/inference/karlo/t2i',
-                            json={
-                'prompt':keywords_prompt,
+        r = requests.post(
+            'https://api.kakaobrain.com/v2/inference/karlo/t2i',
+            json={
+                'prompt': keywords_prompt,
             },
             headers={
                 'Authorization': f'KakaoAK {REST_API_KEY}',
                 'Content-Type':'application/json'
             }
         )
+
+        if r.status_code == 200:
+            response_json = r.json()
         
-    if r.status_code != 200:
-            raise HTTPException(status_code=400, detail="Image generation failed")
-
-    response_json = r.json()
+            image_url = response_json["images"][0]["image"]
         
-    image_url = response_json["images"][0]["image"]
-        
-    image_urls.append(image_url)
-    
-    html_content = """
-        <html>
-            <body>
-                Generated Images:<br/>
-    """
-    
-    for url in image_urls:
-        html_content += f'<img src="{url}" alt="{keywords_prompt}"><br/>'
-    
-    html_content += f"""
-                    Keywords:<br/>
-                    {', '.join(final_translated_user_and_tfidf_keywrods)}
-                </body>
-            </html>"""
+            image_urls.append(image_url)
 
-    return HTMLResponse(content=html_content, status_code=200)
+            logger.info(f"Image generation successful for request {i+1}")  # 이미지 생성 요청이 성공적으로 완료되었음을 로그로 남깁니다.
+        else:
+             logger.warning(f"Image generation failed for request {i+1}")  # 이미지 생성 요청이 실패했음을 로그로 남깁니다.
 
+    if len(image_urls) == 0:
+        return {
+             'isSuccess': False,
+             'code': 400,
+             'message': "이미지 생성에 실패하였습니다."
+         }
+    
+    logger.info("Image generation requests completed successfully")  # 모든 이미지 생성 요청이 성공적으로 완료되었음을 로그로 남깁니다.
 
-            
+    return {
+         'isSuccess': True,
+         'code': 200,
+         'message': "요청에 성공하였습니다.",
+         'data': image_urls
+     }
