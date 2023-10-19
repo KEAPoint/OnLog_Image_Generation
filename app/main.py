@@ -258,7 +258,7 @@ async def generate_image(input_data: ImageInput):
     REST_API_KEY = "9ea943bc1dce2cd5fe7a41bdba661924"
 
     image_urls = []  
-    for _ in range(8):   
+    for i in range(8):   
         r = requests.post(
             'https://api.kakaobrain.com/v2/inference/karlo/t2i',
             json={
