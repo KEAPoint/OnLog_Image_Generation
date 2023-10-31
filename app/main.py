@@ -126,8 +126,15 @@ def request_image_to_karlo(keywords):
     # 응답을 JSON 형식으로 해석합니다.
     response_json = response.json()
 
+    # 응답 내용을 로그로 출력합니다.
+    logging.info(f"Response from Karlo: {response_json}")
+
     # 응답에서 이미지 URL을 추출합니다.
-    image_urls = [image["image"] for image in response_json["images"]]
+    try:
+        image_urls = [image["image"] for image in response_json["images"]]
+    except KeyError:
+        logging.error(f"Cannot find 'images' key in the response: {response_json}")
+        image_urls = []
 
     # 로그 작성
     logging.info(f"Image URLs from Karlo: {image_urls}")
