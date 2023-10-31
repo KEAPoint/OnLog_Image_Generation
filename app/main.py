@@ -99,8 +99,7 @@ def translate_keywords(keywords):
 
 # Karlo에 이미지 생성 요청을 보내는 함수를 정의합니다.
 def request_image_to_karlo(keywords):
-    # 환경변수를 통해 Karlo API 키를 가져옵니다.
-    karlo_api_key = os.getenv("KARLO_API_KEY")
+    karlo_api_key = "9ea943bc1dce2cd5fe7a41bdba661924"
 
     # 요청 헤더를 정의합니다.
     headers = {
