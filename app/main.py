@@ -32,7 +32,7 @@ logging.basicConfig(
 app = FastAPI()
 
 # 구글 클라우드 키 경로 설정
-translate_client = translate.Client.from_service_account_json("../my-key.json")
+translate_client = translate.Client.from_service_account_json("/code/my-key.json")
 
 # TF-IDF를 이용해 키워드를 추출하는 함수를 정의합니다.
 def get_keywords(text, num_keywords):
