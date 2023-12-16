@@ -34,37 +34,37 @@
 
 해당 프로젝트를 추가로 개발 혹은 실행시켜보고 싶으신 경우 아래의 절차에 따라 진행해주세요
 
-1. 가상 환경 생성
+#### 1. 가상 환경 생성
 
 ```commandline
 python3 -m venv venv
 ```
 
-2. 가상 환경 활성화
+### 2. 가상 환경 활성화
 
 ```commandline
 source venv/bin/activate
 ```
 
-3. requirements 다운로드
+### 3. requirements 다운로드
 
 ```commandline
 pip install -r requirements.txt
 ```
 
-4. `.env` 파일 생성
+### 4. `.env` 파일 생성
 
 ```commandline
 touch .env
 ```
 
-5. `.env` 파일에 Karlo API Key 정보 입력
+### 5. `.env` 파일에 Karlo API Key 정보 입력
 
 ```text
 KARLO_API_KEY = "{KARLO_API_KEY}"
 ```
 
-6. google translate 사용을 위한 my-key.json 추가 (예시)
+### 6. google translate 사용을 위한 my-key.json 추가 (예시)
 
 ```text
 {
@@ -82,24 +82,24 @@ KARLO_API_KEY = "{KARLO_API_KEY}"
 }
 ```
 
-참고) Google Cloud Translation API의 키 발급 방법  
-> 1. Google Cloud Console에 로그인합니다.  
-> 2. 좌측 메뉴에서 'IAM & Admin' > 'Service Accounts'를 클릭합니다.  
-> 3. 상단의 '+ CREATE SERVICE ACCOUNT' 버튼을 클릭합니다.  
-> 4. 서비스 계정 이름과 설명을 입력하고 'CREATE' 버튼을 클릭합니다.  
-> 5. 'Service Account Permissions' 화면에서 'Role' 드롭다운 메뉴에서 'Cloud Translation > Cloud Translation API User'를 선택하고 'CONTINUE'를 클릭합니다.  
-> 6. 'Grant users access to this service account' 화면에서 'DONE'을 클릭하여 서비스 계정 생성을 완료합니다.  
-> 7. 생성한 서비스 계정을 클릭하고, 'Keys' 탭에서 'ADD KEY'를 클릭한 후 'Create new key'를 선택합니다.  
-> 8. 'Key type'에서 'JSON'을 선택하고 'CREATE'를 클릭합니다.  
+> 참고) Google Cloud Translation API의 키 발급 방법  
+>> 1. Google Cloud Console에 로그인합니다.  
+>> 2. 좌측 메뉴에서 'IAM & Admin' > 'Service Accounts'를 클릭합니다.  
+>> 3. 상단의 '+ CREATE SERVICE ACCOUNT' 버튼을 클릭합니다.  
+>> 4. 서비스 계정 이름과 설명을 입력하고 'CREATE' 버튼을 클릭합니다.  
+>> 5. 'Service Account Permissions' 화면에서 'Role' 드롭다운 메뉴에서 'Cloud Translation > Cloud Translation API User'를 선택하고 'CONTINUE'를 클릭합니다.  
+>> 6. 'Grant users access to this service account' 화면에서 'DONE'을 클릭하여 서비스 계정 생성을 완료합니다.  
+>> 7. 생성한 서비스 계정을 클릭하고, 'Keys' 탭에서 'ADD KEY'를 클릭한 후 'Create new key'를 선택합니다.  
+>> 8. 'Key type'에서 'JSON'을 선택하고 'CREATE'를 클릭합니다.  
 
 
-7. 프로그램 실행
+### 7. 프로그램 실행
 
 ```commandline
 uvicorn main:app --port 8000 --reload
 ```
 
-참고) 프로젝트가 실행 중인 환경에 한해 아래 URL에서 API 명세서를 확인할 수 있습니다
+**참고) 프로젝트가 실행 중인 환경에 한해 아래 URL에서 API 명세서를 확인할 수 있습니다**
 
 ```commandline
 http://localhost:8000/docs
