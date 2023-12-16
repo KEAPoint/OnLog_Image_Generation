@@ -81,6 +81,16 @@ KARLO_API_KEY = "{KARLO_API_KEY}"
     "universe_domain": "{universe_domain}"
 }
 ```
+* Google Cloud Translation API의 키 발급 방법
+
+1. Google Cloud Console에 로그인합니다.
+2. 좌측 메뉴에서 'IAM & Admin' > 'Service Accounts'를 클릭합니다.
+3. 상단의 '+ CREATE SERVICE ACCOUNT' 버튼을 클릭합니다.
+4. 서비스 계정 이름과 설명을 입력하고 'CREATE' 버튼을 클릭합니다.
+5. 'Service Account Permissions' 화면에서 'Role' 드롭다운 메뉴에서 'Cloud Translation > Cloud Translation API User'를 선택하고 'CONTINUE'를 클릭합니다.
+6. 'Grant users access to this service account' 화면에서 'DONE'을 클릭하여 서비스 계정 생성을 완료합니다.
+7. 생성한 서비스 계정을 클릭하고, 'Keys' 탭에서 'ADD KEY'를 클릭한 후 'Create new key'를 선택합니다.
+8. 'Key type'에서 'JSON'을 선택하고 'CREATE'를 클릭합니다.
 
 7. 프로그램 실행
 
