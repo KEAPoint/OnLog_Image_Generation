@@ -8,20 +8,27 @@ from nltk.tokenize import WordPunctTokenizer
 from google.cloud import translate_v2 as translate
 from typing import List
 from pydantic import BaseModel
+from starlette.config import Config
+
+config = Config(".env")
+KARLO_API_KEY = config('KARLO_API_KEY')
 
 
 class ImageRequest(BaseModel):
     content: str
     hashtag: List[str]
 
+
 class ImageData(BaseModel):
     imageUrl: List[str]
+
 
 class ImageResponse(BaseModel):
     isSuccess: bool
     code: int
     message: str
     data: ImageData
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -33,7 +40,8 @@ logging.basicConfig(
 app = FastAPI()
 
 # 구글 클라우드 키 경로 설정
-translate_client = translate.Client.from_service_account_json("/code/my-key.json")
+translate_client = translate.Client.from_service_account_json("./my-key.json")
+
 
 # TF-IDF를 이용해 키워드를 추출하는 함수를 정의합니다.
 def get_keywords(text, num_keywords):
@@ -99,11 +107,9 @@ def translate_keywords(keywords):
 
 # Karlo에 이미지 생성 요청을 보내는 함수를 정의합니다.
 def request_image_to_karlo(keywords):
-    karlo_api_key = "9ea943bc1dce2cd5fe7a41bdba661924"
-
     # 요청 헤더를 정의합니다.
     headers = {
-        "Authorization": f"KakaoAK {karlo_api_key}",
+        "Authorization": f"KakaoAK {KARLO_API_KEY}",
         "Content-Type": "application/json",
     }
 
@@ -139,6 +145,7 @@ def request_image_to_karlo(keywords):
     logging.info(f"Image URLs from Karlo: {image_urls}")
 
     return image_urls
+
 
 # 이미지 생성 API 엔드포인트를 정의합니다.
 @app.post("/generate-images", response_model=ImageResponse)
