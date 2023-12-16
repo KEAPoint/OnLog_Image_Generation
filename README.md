@@ -40,31 +40,31 @@
 python3 -m venv venv
 ```
 
-### 2. 가상 환경 활성화
+#### 2. 가상 환경 활성화
 
 ```commandline
 source venv/bin/activate
 ```
 
-### 3. requirements 다운로드
+#### 3. requirements 다운로드
 
 ```commandline
 pip install -r requirements.txt
 ```
 
-### 4. `.env` 파일 생성
+#### 4. `.env` 파일 생성
 
 ```commandline
 touch .env
 ```
 
-### 5. `.env` 파일에 Karlo API Key 정보 입력
+#### 5. `.env` 파일에 Karlo API Key 정보 입력
 
 ```text
 KARLO_API_KEY = "{KARLO_API_KEY}"
 ```
 
-### 6. google translate 사용을 위한 my-key.json 추가 (예시)
+#### 6. google translate 사용을 위한 my-key.json 추가 (예시)
 
 ```text
 {
@@ -93,7 +93,7 @@ KARLO_API_KEY = "{KARLO_API_KEY}"
 >> 8. 'Key type'에서 'JSON'을 선택하고 'CREATE'를 클릭합니다.  
 
 
-### 7. 프로그램 실행
+#### 7. 프로그램 실행
 
 ```commandline
 uvicorn main:app --port 8000 --reload
